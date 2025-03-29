@@ -24,7 +24,7 @@ static ss_obtree_node_t* _ss_obtree_node_new(const void* key, size_t ksize, size
     node->entry.ksize = ksize;
     node->khash = khash;
 
-    if (data)
+    if (data && dsize > 0)
     {
         node->entry.value = ss_malloc(dsize);
         if (!node->entry.value)
@@ -69,7 +69,7 @@ int _ss_obtree_node_compare(ss_obtree_t* t, ss_obtree_node_t* node, const void* 
     }
     else
     {
-        cmprs = t->compare(key, ksize, node->entry.key, node->entry.ksize);
+        cmprs = t->key_compare(key, ksize, node->entry.key, node->entry.ksize);
     }
     return cmprs;
 }
@@ -194,7 +194,8 @@ ss_bool_t _ss_obtree_node_data_replace(ss_obtree_t* t, ss_obtree_node_t* node, c
             return SS_FALSE;
         }
     }
-    else if (t->compare(node->entry.value, node->entry.vsize, data, dsize) != 0)
+    else if (!t->val_compare ||
+             t->val_compare(node->entry.value, node->entry.vsize, data, dsize) != 0)
     {
         if (node->entry.vsize >= dsize)
         {
@@ -270,18 +271,20 @@ ss_obtree_node_t* _ss_obtree_left_leaf_find(ss_obtree_node_t* node)
     return node;
 }
 
-void ss_obtree_init(ss_obtree_t* t, ss_hash_f hash, ss_compare_f compare)
+void ss_obtree_init(ss_obtree_t* t, ss_hash_f key_hash, ss_compare_f key_compare,
+                    ss_compare_f val_compare)
 {
     memset(t, 0, sizeof(ss_obtree_t));
     // t->pool = pool;
-    t->hash = hash;
-    t->compare = compare;
+    t->key_hash = key_hash;
+    t->key_compare = key_compare;
+    t->val_compare = val_compare;
 }
 
 ss_obtree_node_t* ss_obtree_set(ss_obtree_t* t, const void* key, size_t ksize, const void* data,
                                 size_t dsize)
 {
-    return ss_obtree_set2(t, key, ksize, t->hash(key, ksize), data, dsize);
+    return ss_obtree_set2(t, key, ksize, t->key_hash(key, ksize), data, dsize);
 }
 
 ss_obtree_node_t* ss_obtree_set2(ss_obtree_t* t, const void* key, size_t ksize, size_t khash,
@@ -301,7 +304,7 @@ ss_obtree_node_t* ss_obtree_set2(ss_obtree_t* t, const void* key, size_t ksize, 
 
 ss_obtree_node_t* ss_obtree_get(ss_obtree_t* t, const void* key, size_t ksize)
 {
-    return ss_obtree_get2(t, key, ksize, t->hash(key, ksize));
+    return ss_obtree_get2(t, key, ksize, t->key_hash(key, ksize));
 }
 
 ss_obtree_node_t* ss_obtree_get2(ss_obtree_t* t, const void* key, size_t ksize, size_t khash)
@@ -316,7 +319,7 @@ ss_obtree_node_t* ss_obtree_get2(ss_obtree_t* t, const void* key, size_t ksize, 
 }
 ss_bool_t ss_obtree_remove(ss_obtree_t* t, const void* key, size_t ksize)
 {
-    return ss_obtree_remove2(t, key, ksize, t->hash(key, ksize));
+    return ss_obtree_remove2(t, key, ksize, t->key_hash(key, ksize));
 }
 
 ss_bool_t ss_obtree_remove2(ss_obtree_t* t, const void* key, size_t ksize, size_t khash)

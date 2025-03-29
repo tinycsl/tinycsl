@@ -83,7 +83,7 @@ void ss_hashmap_put(ss_hashmap_t* map, const void* key, size_t ksize, const void
     else
     {
         bucket = (ss_hashmap_bucket*)ss_malloc(sizeof(ss_hashmap_bucket));
-        ss_obtree_init(bucket, map->hash, map->compare);
+        ss_obtree_init(bucket, map->hash, map->compare, NULL);
         ss_obtree_set2(bucket, key, ksize, khash, value, vsize);
         map->size++;
         map->buckets[bidx] = bucket;

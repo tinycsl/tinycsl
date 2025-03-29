@@ -28,8 +28,9 @@ struct ss_obtree_s
     ss_obtree_node_t* root; // Root node
     size_t size;            // Node count
 
-    ss_hash_f hash;
-    ss_compare_f compare;
+    ss_hash_f key_hash;
+    ss_compare_f key_compare;
+    ss_compare_f val_compare; // 可以为空，如果为空，ss_obtree_set操作时将不会比较值是否相等
 };
 
 struct ss_obtree_node_s
@@ -45,7 +46,8 @@ struct ss_obtree_node_s
 typedef ss_bool_t (*ss_obtree_iterate_cb_f)(ss_obtree_t* t, ss_obtree_node_t* node, int depth,
                                             void* param);
 
-void ss_obtree_init(ss_obtree_t* t, ss_hash_f hash, ss_compare_f compare);
+void ss_obtree_init(ss_obtree_t* t, ss_hash_f key_hash, ss_compare_f key_compare,
+                    ss_compare_f val_compare);
 void ss_obtree_destroy(ss_obtree_t* t);
 
 ss_obtree_node_t* ss_obtree_set(ss_obtree_t* t, const void* key, size_t ksize, const void* data,
