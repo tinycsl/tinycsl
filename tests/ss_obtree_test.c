@@ -59,7 +59,7 @@ void test_obtree()
 
     // Test tree initialization
     ss_obtree_t tree;
-    ss_obtree_init(&tree, ss_hash_mem, ss_compare_mem);
+    ss_obtree_init(&tree, ss_hash_mem, ss_compare_mem, NULL);
     assert(tree.root == NULL);
     assert(tree.size == 0);
     printf("[OK] ss_obtree_init: Tree initialization test passed\n");

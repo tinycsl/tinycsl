@@ -117,6 +117,19 @@ void test_hashmap()
     // assert(ss_hashmap_get(NULL, "key1", strlen("key1"), &vsize) == NULL); // NULL map
     printf("[OK] NULL handling: NULL pointer cases properly handled\n");
 
+    // 测试空值
+    ss_hashmap_clear(&stack_map);
+    ss_hashmap_put(&stack_map, "key1", strlen("key1"), new_value, strlen(new_value));
+    ss_hashmap_put(&stack_map, "key2", strlen("key2"), new_value, strlen(new_value));
+    ss_hashmap_put(&stack_map, "key3", strlen("key3"), "", 0);
+    ss_hashmap_put(&stack_map, "key4", strlen("key4"), NULL, 0);
+    assert(stack_map.size == 4);
+    ss_array_t test_keys;
+    ss_array_init(&test_keys, sizeof(ss_slice_t), ss_hashmap_size(&stack_map));
+    ss_hashmap_keys(&stack_map, &test_keys);
+    assert(ss_array_size(&test_keys) == ss_hashmap_size(&stack_map));
+    ss_array_destroy(&test_keys);
+
     // Cleanup
     ss_array_destroy(&keys_array);
     ss_hashmap_destroy(&stack_map);
